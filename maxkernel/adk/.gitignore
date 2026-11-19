@@ -3,6 +3,7 @@ session_info/
 .env
 *egg-info
 *.txt
+!dependency/openai_requirements.txt
 .adk
 eval_config.yaml
 gke_config.yaml

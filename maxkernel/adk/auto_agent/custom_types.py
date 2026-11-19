@@ -8,6 +8,8 @@ from google.adk.events import Event, EventActions
 from google.adk.models.google_llm import Gemini
 from google.genai import Client, types
 
+from auto_agent.constants import LLM_PROVIDER
+
 
 class TimeoutGemini(Gemini):
   @cached_property
@@ -31,24 +33,28 @@ class TimeoutGemini(Gemini):
     return Client(**kwargs)
 
 
+def create_model(model_name: str):
+  """Resolve the backend for both agents and conversation summaries."""
+  if LLM_PROVIDER == "openai":
+    from auto_agent.openai_model import OpenAIResponses
+
+    return OpenAIResponses(model=model_name)
+  return TimeoutGemini(
+    model=model_name,
+    retry_options=types.HttpRetryOptions(initial_delay=1, attempts=10),
+  )
+
+
 class CustomLlmAgent(LlmAgent):
   """Agent that allows early exit from the loop if a condition is met.
 
-  Automatically uses gemini_model (with retry support) when a string model name is provided.
+  String model names use the configured MAXKERNEL_LLM_PROVIDER.
   """
 
   def __init__(self, *args, **kwargs):
-    """Initialize CustomLlmAgent with automatic Gemini model (with retry) wrapping."""
-    # If model is a string, use the pre-configured gemini_model with retry support
+    """Initialize with the configured model backend."""
     if "model" in kwargs and isinstance(kwargs["model"], str):
-      gemini_model = TimeoutGemini(
-        model=kwargs["model"],
-        retry_options=types.HttpRetryOptions(
-          initial_delay=1,
-          attempts=10,
-        ),
-      )
-      kwargs["model"] = gemini_model
+      kwargs["model"] = create_model(kwargs["model"])
     super().__init__(*args, **kwargs)
 
   async def _run_async_impl(

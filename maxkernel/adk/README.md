@@ -1,5 +1,9 @@
 # MaxKernel: Intelligent TPU Kernel Engineering Agents
 
+For OpenAI API support and a single-worker Colab experiment using existing
+PallasKernels GQA kernels, see [the bounded experiment guide](experiments/colab/README.md).
+The experimental entry has explicit budgets; the legacy launch scripts below do not.
+
 **MaxKernel** is a suite of AI-powered agents designed for generating, optimizing, testing, profiling, and autotuning high-performance TPU kernels using [JAX/Pallas](https://jax.readthedocs.io/en/latest/pallas/index.html).
 
 Whether you need interactive, step-by-step kernel development or a fully autonomous optimization pipeline, MaxKernel provides dedicated agents tailored to your workflow.
