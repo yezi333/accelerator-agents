@@ -11,7 +11,7 @@
 | `STRATEGIES` | 下面列出的 5 条 | 每条策略产生一条原生 Parallel Search 路线 |
 | `FULL_ITERATIONS` | `5` | 每个 worker 的原生 pipeline 最大优化轮数 |
 | `MAX_CONCURRENCY` | `2` | 同时运行的 worker 上限，其余排队 |
-| `API_TIMEOUT_SECONDS` | `900` | LLM 每次网络尝试的等待超时（秒），经 `MAXKERNEL_API_TIMEOUT` 传给 OpenAI SDK |
+| `API_TIMEOUT_SECONDS` | `360` | LLM 每次网络尝试的等待超时（秒），经 `MAXKERNEL_API_TIMEOUT` 传给 OpenAI SDK |
 | `FULL_RUN_NAME` | `gqa-decode-native-five-01` | 每次运行使用新名称，避免覆盖已有结果 |
 
 五条初始策略来自原生策略池，可在 Cell 1 编辑：
@@ -28,9 +28,9 @@
 
 ### LLM 超时
 
-迭代请求可能包含较长的历史、工具结果和代码，且当前使用 `high` 推理强度，因此将 notebook 的初始等待超时从 300 秒提高到 900 秒。此值是待 Colab 实测的起始配置，不是已测出的最佳值。它在启动子进程前设置，作用于使用 OpenAI 适配器的各个子 agent 及会话压缩模型，不改变编译、测试或优化轮数。
+迭代请求可能包含较长的历史、工具结果和代码，且当前使用 `high` 推理强度，因此将 notebook 的初始等待超时设为 360 秒（6 分钟）。此值是待 Colab 实测的起始配置，不是已测出的最佳值。它在启动子进程前设置，作用于使用 OpenAI 适配器的各个子 agent 及会话压缩模型，不改变编译、测试或优化轮数。
 
-适配器将此值传给 OpenAI SDK/HTTPX 的网络超时；其中读取超时是等待下一段响应数据的时间，并非整个模型调用的严格墙钟上限。SDK 最多额外重试 2 次：若每次都等到读取超时，三次等待可能累计约 45 分钟，另有连接、传输和退避时间。重试耗尽后错误仍按原 worker 逻辑处理，不会无限重试。
+适配器将此值传给 OpenAI SDK/HTTPX 的网络超时；其中读取超时是等待下一段响应数据的时间，并非整个模型调用的严格墙钟上限。SDK 最多额外重试 2 次：若每次都等到读取超时，三次等待可能累计约 18 分钟，另有连接、传输和退避时间。重试耗尽后错误仍按原 worker 逻辑处理，不会无限重试。
 
 Cell 3.5 仅用短输入请求 `OK`，继续使用 60 秒且不重试；它通过不代表长迭代请求能在 60 秒内完成。`auto_agent/config.py` 的 90 秒限制属于 Gemini API，不作用于 OpenAI Responses 请求。
 
