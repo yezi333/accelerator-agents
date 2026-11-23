@@ -202,6 +202,12 @@ def main():
   parser.add_argument("--repo", required=True, type=Path)
   parser.add_argument("--session-dir", required=True, type=Path)
   parser.add_argument("--iterations", type=int, default=5)
+  parser.add_argument(
+    "--strategies",
+    nargs="+",
+    help="Run one original Parallel Search worker per explicit strategy",
+  )
+  parser.add_argument("--max-concurrency", type=int, default=2)
   args = parser.parse_args()
   # Native agents resolve their knowledge files relative to the ADK directory.
   adk_dir = Path(os.environ["MAXKERNEL_ADK_DIR"]).resolve()
@@ -210,8 +216,17 @@ def main():
   os.chdir(adk_dir)
   if args.iterations < 1:
     parser.error("--iterations must be positive")
-  if not all(os.environ.get(k) for k in ("OPENAI_API_KEY", "MAXKERNEL_MODEL")):
-    parser.error("Set OPENAI_API_KEY and MAXKERNEL_MODEL")
+  if args.max_concurrency < 1:
+    parser.error("--max-concurrency must be positive")
+  if args.strategies and (
+    any(not strategy.strip() for strategy in args.strategies)
+    or len(set(args.strategies)) != len(args.strategies)
+  ):
+    parser.error("--strategies must contain distinct non-empty directions")
+  if not os.environ.get("OPENAI_API_KEY") or not (
+    os.environ.get("MAXKERNEL_MODEL") or os.environ.get("MODEL_NAME")
+  ):
+    parser.error("Set OPENAI_API_KEY and MAXKERNEL_MODEL (or MODEL_NAME)")
   if os.environ.get("MAXKERNEL_LLM_PROVIDER") != "openai":
     parser.error("Set MAXKERNEL_LLM_PROVIDER=openai before launch")
   directory, repo = args.session_dir.resolve(), args.repo.resolve()
@@ -280,7 +295,20 @@ def main():
         processes.append(process)
         wait_healthy(process, port, log_path)
         print(f"Native {name} service ready: {port}", flush=True)
-      asyncio.run(run_agent(directory, args.iterations, config))
+      if args.strategies:
+        from experiments.full_adk.search import run_search
+
+        asyncio.run(
+          run_search(
+            directory,
+            args.iterations,
+            config,
+            args.strategies,
+            args.max_concurrency,
+          )
+        )
+      else:
+        asyncio.run(run_agent(directory, args.iterations, config))
     finally:
       for process in reversed(processes):
         stop_process_group(process)
