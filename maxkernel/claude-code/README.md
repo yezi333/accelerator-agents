@@ -20,6 +20,10 @@ This repository contains everything except your personal Claude Code config.
 
 Read the **[User Guide](user_guide.md)** — a short walkthrough of how to use MaxKernel on Claude Code
 
+For an experimental OpenAI-compatible Responses API host on Colab or a TPU server,
+see [OpenAI runtime](openai_runtime/README.md). It renders the original prompts and
+uses the same tools, correctness gates, autotuning and profiling stages.
+
 ---
 
 ## What's in here

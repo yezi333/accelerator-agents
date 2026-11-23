@@ -1,0 +1,3 @@
+# Host-only dependencies. Install the original ../requirements.txt separately
+# in the pipeline/TPU environment; do not replace its pins with the ADK stack.
+openai==2.54.0

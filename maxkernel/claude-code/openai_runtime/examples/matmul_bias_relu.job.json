@@ -1,0 +1,16 @@
+{
+  "name": "matmul-bias-relu-openai",
+  "input": {
+    "type": "jax",
+    "path": "matmul_bias_relu.py",
+    "entry_point": "computation",
+    "inputs_fn": "get_inputs"
+  },
+  "has_reference": false,
+  "references": [],
+  "needs_jax_conversion": false,
+  "jax_conversion": {"method": "none", "emit_readable_reference": true},
+  "correctness": {"atol": 0.01, "rtol": 0.01, "seed": 0},
+  "target": {"tpu_version": "TPU v6e"},
+  "loop": {"max_iterations": 5}
+}
