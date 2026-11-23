@@ -24,6 +24,9 @@ For an experimental OpenAI-compatible Responses API host on Colab or a TPU serve
 see [OpenAI runtime](openai_runtime/README.md). It renders the original prompts and
 uses the same tools, correctness gates, autotuning and profiling stages.
 
+To use **Codex CLI itself** as the agent runtime, see [Native Codex CLI](codex_cli/README.md)
+and its Colab notebook. It registers the original roles as native Codex agents.
+
 ---
 
 ## What's in here
